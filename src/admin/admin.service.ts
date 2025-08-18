@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { AdminEntity } from './admin.entity';
 import { CreateAdminDto, UpdateAdminDto, UpdateCountryDto } from './admin.dto';
+import { CustomMailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(AdminEntity)
     private readonly adminRepository: Repository<AdminEntity>,
+    private readonly mailerService: CustomMailerService,
   ) {}
 
   // Create a user
@@ -24,6 +26,13 @@ export class AdminService {
 
       const admin = this.adminRepository.create(processedData);
       const savedAdmin = await this.adminRepository.save(admin);
+
+      // Send welcome email
+      await this.mailerService.sendWelcomeEmail(
+        savedAdmin.email,
+        savedAdmin.name
+      );
+
       return {
         success: true,
         message: 'Admin created successfully',

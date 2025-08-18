@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 
 import { AdminModule } from './admin/admin.module';
+import { AuthModule } from './auth/auth.module';
+import { CustomMailerModule } from './mailer/mailer.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -17,6 +19,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true,
     }),
     AdminModule,
+    AuthModule,
+    CustomMailerModule,
   ],
 })
 export class AppModule {}

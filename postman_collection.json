@@ -1,8 +1,9 @@
 {
   "info": {
-    "name": "User Management System API",
-    "description": "Complete API collection for user management system including login, signup, updates, and user operations",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "NestJS Admin Management System API",
+    "description": "Complete API collection for the NestJS Admin Management System with JWT authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "unique-id-12345"
   },
   "variable": [
     {
@@ -11,22 +12,32 @@
       "type": "string"
     },
     {
-      "key": "userId",
+      "key": "authToken",
       "value": "",
       "type": "string"
     },
     {
-      "key": "authToken",
+      "key": "adminId",
       "value": "",
       "type": "string"
     }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
   "item": [
     {
-      "name": "Authentication",
+      "name": "🔐 Authentication",
       "item": [
         {
-          "name": "Login with Username",
+          "name": "Login",
           "request": {
             "method": "POST",
             "header": [
@@ -37,18 +48,36 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"john_doe\",\n  \"password\": \"SecurePass123\"\n}"
+              "raw": "{\n  \"username\": \"admin_user\",\n  \"password\": \"SecurePass123\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/login",
+              "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
-              "path": ["login"]
-            },
-            "description": "Login using username and password"
-          }
+              "path": ["auth", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access_token\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('access_token');",
+                  "    pm.collectionVariables.set('authToken', response.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Signup New User",
+          "name": "Signup",
           "request": {
             "method": "POST",
             "header": [
@@ -59,23 +88,40 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123\",\n  \"name\": \"John Doe\"\n}"
+              "raw": "{\n  \"username\": \"new_admin\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"SecurePass123\",\n  \"name\": \"Admin User\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/signup",
+              "raw": "{{baseUrl}}/auth/signup",
               "host": ["{{baseUrl}}"],
-              "path": ["signup"]
-            },
-            "description": "Register a new user account"
-          }
+              "path": ["auth", "signup"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates success\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "User Management",
+      "name": "👥 Admin Management",
       "item": [
         {
-          "name": "Create New User",
+          "name": "Create Admin",
           "request": {
             "method": "POST",
             "header": [
@@ -86,227 +132,428 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"jane_smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"password\": \"SecurePass123\",\n  \"name\": \"Jane Smith\",\n  \"mobile\": \"+1234567890\",\n  \"role\": \"user\"\n}"
+              "raw": "{\n  \"username\": \"test_admin\",\n  \"email\": \"test@admin.com\",\n  \"password\": \"AdminPass123\",\n  \"name\": \"Test Admin\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Test Street\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"socialMediaLink\": \"https://github.com/testadmin\",\n  \"country\": \"USA\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/add/user",
+              "raw": "{{baseUrl}}/admin/create",
               "host": ["{{baseUrl}}"],
-              "path": ["add", "user"]
-            },
-            "description": "Create a new user with all details"
-          }
+              "path": ["admin", "create"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin created successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.include('created');",
+                  "    if (response.data && response.data.id) {",
+                  "        pm.collectionVariables.set('adminId', response.data.id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Get User by ID",
+          "name": "Create Admin (Legacy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"legacy_admin\",\n  \"email\": \"legacy@admin.com\",\n  \"password\": \"AdminPass123\",\n  \"name\": \"Legacy Admin\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Legacy Street\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"socialMediaLink\": \"https://github.com/legacyadmin\",\n  \"country\": \"USA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/createAdmin",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "createAdmin"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin created successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.include('created');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Admins",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/user/{{userId}}",
+              "raw": "{{baseUrl}}/admin/all",
               "host": ["{{baseUrl}}"],
-              "path": ["user", "{{userId}}"]
-            },
-            "description": "Retrieve user information by user ID"
-          }
+              "path": ["admin", "all"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains admins array\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Delete User by ID",
+          "name": "Get Admin Info (Legacy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/getAdminInfo",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "getAdminInfo"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates success\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Admin by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/getAdminById/{{adminId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "getAdminById", "{{adminId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin found\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('id');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Admin by Name and ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/getAdminInfoByNameAndId?name=Test Admin&id={{adminId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "getAdminInfoByNameAndId"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Test Admin"
+                },
+                {
+                  "key": "id",
+                  "value": "{{adminId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates success\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Admin Name\",\n  \"country\": \"Canada\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/updateAdmin/{{adminId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "updateAdmin", "{{adminId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin updated successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.include('updated');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Admin Country",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country\": \"Germany\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/updateCountry/{{adminId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "updateCountry", "{{adminId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Country updated successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.include('Country updated');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Admins by Joining Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/byJoiningDate?date=2024-01-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "byJoiningDate"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2024-01-01"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains admins array\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Admins with Default Country",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/defaultCountry",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "defaultCountry"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains admins array\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Admin Body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Body Admin\",\n  \"id\": 999\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/addAdminBody",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "addAdminBody"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin body added successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.include('added');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Admin",
           "request": {
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/user/{{userId}}",
+              "raw": "{{baseUrl}}/admin/deleteAdminById/{{adminId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["user", "{{userId}}"]
-            },
-            "description": "Delete a user by user ID"
-          }
-        }
-      ]
-    },
-    {
-      "name": "User Updates",
-      "item": [
-        {
-          "name": "Update Username",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "path": ["admin", "deleteAdminById", "{{adminId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin deleted successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.include('deleted');",
+                  "});"
+                ]
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"newUsername\": \"new_username_123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/update/username",
-              "host": ["{{baseUrl}}"],
-              "path": ["update", "username"]
-            },
-            "description": "Update user's username"
-          }
-        },
-        {
-          "name": "Update Password",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"currentPassword\": \"SecurePass123\",\n  \"newPassword\": \"NewSecurePass456\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/update/password",
-              "host": ["{{baseUrl}}"],
-              "path": ["update", "password"]
-            },
-            "description": "Update user's password"
-          }
-        },
-        {
-          "name": "Update Name",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"newName\": \"John Michael Doe\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/update/name",
-              "host": ["{{baseUrl}}"],
-              "path": ["update", "name"]
-            },
-            "description": "Update user's full name"
-          }
-        },
-        {
-          "name": "Update Mobile",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"newMobile\": \"+1987654321\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/update/mobile",
-              "host": ["{{baseUrl}}"],
-              "path": ["update", "mobile"]
-            },
-            "description": "Update user's mobile number"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Test Data",
-      "item": [
-        {
-          "name": "Test Login - Valid",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"TestPass123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["login"]
-            },
-            "description": "Test login with valid credentials"
-          }
-        },
-        {
-          "name": "Test Login - Invalid Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"wrongpassword\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["login"]
-            },
-            "description": "Test login with invalid password"
-          }
-        },
-        {
-          "name": "Test Signup - Valid",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"NewUserPass123\",\n  \"name\": \"New User\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/signup",
-              "host": ["{{baseUrl}}"],
-              "path": ["signup"]
-            },
-            "description": "Test signup with valid data"
-          }
-        },
-        {
-          "name": "Test Signup - Invalid Email",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"ValidPass123\",\n  \"name\": \"Test User\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/signup",
-              "host": ["{{baseUrl}}"],
-              "path": ["signup"]
-            },
-            "description": "Test signup with invalid email format"
-          }
+            }
+          ]
         }
       ]
     }
@@ -317,39 +564,9 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "// Auto-generate test data if needed",
-          "if (pm.collectionVariables.get('userId') === '') {",
-          "    pm.collectionVariables.set('userId', 'user-' + Date.now());",
-          "}"
-        ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "// Common test script",
-          "pm.test('Status code is 200', function () {",
-          "    pm.response.to.have.status(200);",
-          "});",
-          "",
-          "pm.test('Response has success property', function () {",
-          "    const jsonData = pm.response.json();",
-          "    pm.expect(jsonData).to.have.property('success');",
-          "});",
-          "",
-          "pm.test('Response has message property', function () {",
-          "    const jsonData = pm.response.json();",
-          "    pm.expect(jsonData).to.have.property('message');",
-          "});",
-          "",
-          "// Store userId from create user response",
-          "if (pm.request.url.path.includes('add/user')) {",
-          "    const response = pm.response.json();",
-          "    if (response.success && response.userId) {",
-          "        pm.collectionVariables.set('userId', response.userId);",
-          "    }",
+          "// Auto-generate unique IDs for testing",
+          "if (!pm.collectionVariables.get('adminId')) {",
+          "    pm.collectionVariables.set('adminId', Math.floor(Math.random() * 1000) + 1);",
           "}"
         ]
       }
