@@ -10,6 +10,8 @@ A robust user/admin management API built with **NestJS 11**, **TypeORM**, **Post
 - ✅ **Validation**: Strong DTO validation using `class-validator`
 - 🗄️ **Database**: PostgreSQL with TypeORM (`autoLoadEntities`, `synchronize` enabled)
 - 🛡️ **Global Pipes**: Whitelisting, non-whitelisted protection, and transformation
+- 🔒 **Password hashing**: bcrypt (salt rounds 10)
+- 🔗 **Relationships**: One-to-Many `SuperAdmin -> Admin`
 
 ## 🛠️ Tech Stack
 
@@ -138,20 +140,21 @@ Base path: `/admin`
 - `POST /admin/addAdminBody`: Demo add with body fields `name`, `id`
 - `GET /admin/getAdminInfoByNameAndId?name=...&id=...`: Query by name and id
 
-Example: `POST /admin/create`
-```json
-{
-  "name": "Jane Smith",
-  "email": "jane@example.com",
-  "phone": "+1234567890",
-  "address": "123 Street, City",
-  "username": "jane_smith",
-  "password": "pass@abc",
-  "country": "USA",
-  "dateOfBirth": "1990-01-01",
-  "socialMediaLink": "https://github.com/jane"
-}
-```
+### SuperAdmin
+Base path: `/superadmin`
+
+- `POST /superadmin` — create super admin
+- `GET /superadmin` — list super admins (includes related admins)
+- `GET /superadmin/:id` — get one super admin (includes related admins)
+- `PUT /superadmin/:id` — update super admin
+- `DELETE /superadmin/:id` — delete super admin
+- `PUT /superadmin/:id/assign-admin/:adminId` — assign an admin to a super admin
+- `PUT /superadmin/:id/remove-admin/:adminId` — remove an admin from a super admin
+
+### Relationship Model
+- One `SuperAdmin` has many `Admin` users.
+- `AdminEntity` contains `superAdminId` foreign key (nullable, `SET NULL` on delete).
+- Endpoints above allow assigning/removing relations and performing full CRUD (≥ 3 CRUD routes).
 
 ### Mailer
 Base path: `/mailer`
@@ -193,7 +196,7 @@ export class CreateAdminDto {
   phone: string;
   address: string;
   username: string;           // letters/numbers/underscores
-  password: string;           // must include lowercase + one of @#$&
+  password: string;           // min 6 chars
   country?: string;           // defaults to "Unknown"
   dateOfBirth: string;        // ISO date e.g., 1990-01-01
   socialMediaLink: string;    // https://github.com|facebook|linkedin|twitter/... 
@@ -202,8 +205,7 @@ export class CreateAdminDto {
 
 ## 🧪 Testing
 
-- Import `postman_collection.json` for Auth/Admin
-- Import `mailer-postman-collection.json` for Mailer
+- Import `Unified.postman_collection.json` into Postman (contains Auth, Admin, Mailer, and SuperAdmin folders)
 
 ## 📁 Project Structure
 ```
@@ -225,6 +227,11 @@ src/
 │   ├── mailer.service.ts
 │   ├── mailer.controller.ts
 │   └── mailer.config.ts
+├── superadmin/
+│   ├── superadmin.controller.ts
+│   ├── superadmin.service.ts
+│   ├── superadmin.entity.ts
+│   └── superadmin.dto.ts
 ├── app.module.ts
 └── main.ts
 ```
@@ -237,7 +244,8 @@ src/
 ## 🔒 Security Notes
 - Do not commit real passwords or SMTP credentials
 - Move inline secrets to environment variables for production
-- Hash passwords before saving (consider `bcrypt`); current login compares plaintext
+- Passwords are hashed with `bcrypt` (salt rounds 10) on create/update; login validates with `bcrypt.compare`
+- If upgrading from a plaintext version, migrate by hashing existing stored passwords or forcing password reset; plaintext entries will fail to authenticate
 
 ## 📄 License
 MIT (see `LICENSE`)

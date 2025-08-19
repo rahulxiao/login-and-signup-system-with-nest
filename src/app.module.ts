@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CustomMailerModule } from './mailer/mailer.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SuperAdminModule } from './superadmin/superadmin.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     AdminModule,
     AuthModule,
     CustomMailerModule,
+    SuperAdminModule,
   ],
 })
 export class AppModule {}

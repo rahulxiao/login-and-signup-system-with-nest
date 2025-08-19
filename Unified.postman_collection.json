@@ -1,0 +1,206 @@
+{
+  "info": {
+    "name": "Login-Signup-System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": {"raw": "http://localhost:3333/auth/login", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["auth","login"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin_user\",\n  \"password\": \"SecurePass123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": {"raw": "http://localhost:3333/auth/signup", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["auth","signup"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"new_admin\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"SecurePass123\",\n  \"name\": \"Admin User\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Create Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": {"raw": "http://localhost:3333/admin/create", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","create"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Street, City\",\n  \"username\": \"jane_smith\",\n  \"password\": \"pass@abc\",\n  \"country\": \"USA\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"socialMediaLink\": \"https://github.com/jane\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Admins",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://localhost:3333/admin/all", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","all"]}
+          }
+        },
+        {
+          "name": "Get Admin By Id",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://localhost:3333/admin/getAdminById/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","getAdminById","1"]}
+          }
+        },
+        {
+          "name": "Update Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": {"raw": "http://localhost:3333/admin/updateAdmin/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","updateAdmin","1"]},
+            "body": {"mode": "raw", "raw": "{\n  \"country\": \"Canada\"\n}"}
+          }
+        },
+        {
+          "name": "Delete Admin",
+          "request": {
+            "method": "DELETE",
+            "url": {"raw": "http://localhost:3333/admin/deleteAdminById/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","deleteAdminById","1"]}
+          }
+        },
+        {
+          "name": "Admins by Joining Date",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://localhost:3333/admin/byJoiningDate?date=2024-01-01", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","byJoiningDate"], "query": [{"key":"date","value":"2024-01-01"}]}
+          }
+        },
+        {
+          "name": "Admins with Default Country",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://localhost:3333/admin/defaultCountry", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["admin","defaultCountry"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mailer",
+      "item": [
+        {
+          "name": "Send Test Email",
+          "request": {
+            "method": "POST",
+            "url": {"raw": "http://localhost:3333/mailer/test", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["mailer","test"]}
+          }
+        },
+        {
+          "name": "Send Welcome Email",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "http://localhost:3333/mailer/welcome", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["mailer","welcome"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"User Name\"\n}"}
+          }
+        },
+        {
+          "name": "Send Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "http://localhost:3333/mailer/verification", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["mailer","verification"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"User Name\",\n  \"code\": \"123456\"\n}"}
+          }
+        },
+        {
+          "name": "Send Email with Template",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "http://localhost:3333/mailer/template", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["mailer","template"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"subject\": \"Welcome\",\n  \"template\": \"welcome\",\n  \"templateData\": { \n    \"name\": \"User Name\"\n  }\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "SuperAdmin",
+      "item": [
+        {
+          "name": "Create SuperAdmin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": {"raw": "http://localhost:3333/superadmin", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"super@example.com\"\n}"}
+          }
+        },
+        {
+          "name": "List SuperAdmins",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://localhost:3333/superadmin", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin"]}
+          }
+        },
+        {
+          "name": "Get SuperAdmin",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://localhost:3333/superadmin/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin","1"]}
+          }
+        },
+        {
+          "name": "Update SuperAdmin",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "http://localhost:3333/superadmin/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin","1"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Updated Super\"\n}"}
+          }
+        },
+        {
+          "name": "Delete SuperAdmin",
+          "request": {
+            "method": "DELETE",
+            "url": {"raw": "http://localhost:3333/superadmin/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin","1"]}
+          }
+        },
+        {
+          "name": "Assign Admin",
+          "request": {
+            "method": "PUT",
+            "url": {"raw": "http://localhost:3333/superadmin/1/assign-admin/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin","1","assign-admin","1"]}
+          }
+        },
+        {
+          "name": "Remove Admin",
+          "request": {
+            "method": "PUT",
+            "url": {"raw": "http://localhost:3333/superadmin/1/remove-admin/1", "protocol": "http", "host": ["localhost"], "port": "3333", "path": ["superadmin","1","remove-admin","1"]}
+          }
+        }
+      ]
+    }
+  ]
+} 

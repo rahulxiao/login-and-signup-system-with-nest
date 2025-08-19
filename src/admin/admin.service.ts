@@ -4,6 +4,7 @@ import { Repository, Between } from 'typeorm';
 import { AdminEntity } from './admin.entity';
 import { CreateAdminDto, UpdateAdminDto, UpdateCountryDto } from './admin.dto';
 import { CustomMailerService } from '../mailer/mailer.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -17,14 +18,19 @@ export class AdminService {
   async createAdmin(adminData: CreateAdminDto) {
     try {
       // Convert dateOfBirth string to Date if provided
-      const processedData = {
+      const processedData: Partial<AdminEntity> = {
         ...adminData,
         dateOfBirth: adminData.dateOfBirth
           ? new Date(adminData.dateOfBirth)
           : undefined,
       };
 
-      const admin = this.adminRepository.create(processedData);
+      if (processedData.password) {
+        const saltRounds = 10;
+        processedData.password = await bcrypt.hash(processedData.password, saltRounds);
+      }
+
+      const admin = this.adminRepository.create(processedData as AdminEntity);
       const savedAdmin = await this.adminRepository.save(admin);
 
       // Send welcome email
@@ -272,12 +278,17 @@ export class AdminService {
   async updateAdmin(id: number, updateData: UpdateAdminDto) {
     try {
       // Convert dateOfBirth string to Date if provided
-      const processedData = {
+      const processedData: Partial<AdminEntity> = {
         ...updateData,
         dateOfBirth: updateData.dateOfBirth
           ? new Date(updateData.dateOfBirth)
           : undefined,
       };
+
+      if (processedData.password) {
+        const saltRounds = 10;
+        processedData.password = await bcrypt.hash(processedData.password, saltRounds);
+      }
 
       const result = await this.adminRepository.update(id, processedData);
       if (result.affected && result.affected > 0) {

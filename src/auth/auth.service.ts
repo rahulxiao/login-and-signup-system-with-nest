@@ -3,12 +3,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AdminService } from '../admin/admin.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignupDto } from './signup.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private adminService: AdminService,
-    private jwtService: JwtService
+    private readonly adminService: AdminService,
+    private readonly jwtService: JwtService
   ) {}
 
   async signIn(
@@ -17,7 +18,8 @@ export class AuthService {
   ): Promise<{ access_token: string }> {
     const admin = await this.adminService.findByUsername(username);
 
-    if (admin?.password !== pass) {
+    const isValid = admin ? await bcrypt.compare(pass, admin.password) : false;
+    if (!admin || !isValid) {
       throw new UnauthorizedException();
     }
 
@@ -28,14 +30,12 @@ export class AuthService {
   }
 
   async signUp(signupDto: SignupDto) {
-    // Convert SignupDto to CreateAdminDto format
-    const createAdminData = {
-      ...signupDto,
-      phone: '', // Default empty value
-      address: '', // Default empty value
-      dateOfBirth: new Date().toISOString(), // Default to current date
-      socialMediaLink: '', // Default empty value
-      country: 'Unknown' // Default country
+    const createAdminData = {...signupDto,
+      phone: '',
+      address: '',
+      dateOfBirth: new Date().toISOString(),
+      socialMediaLink: '',
+      country: 'Unknown'
     };
 
     return await this.adminService.createAdmin(createAdminData);

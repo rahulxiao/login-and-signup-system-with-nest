@@ -5,7 +5,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class CustomMailerService {
   constructor(private readonly mailerService: MailerService) {}
 
-  // Simple method to send a basic test email
   async sendTestEmail(): Promise<boolean> {
     try {
       await this.mailerService.sendMail({

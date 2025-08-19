@@ -1,6 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm';
 import { IsNotEmpty, IsEmail, IsString, IsOptional, IsDateString, Matches, IsUUID } from 'class-validator';
 import { v4 as uuidv4 } from 'uuid';
+import { ManyToOne, JoinColumn } from 'typeorm';
+import { SuperAdminEntity } from '../superadmin/superadmin.entity';
 
 @Entity('admin')
 export class AdminEntity {
@@ -46,9 +48,6 @@ export class AdminEntity {
   @Column({ type: 'varchar', length: 100 })
   @IsNotEmpty()
   @IsString()
-  @Matches(/^(?=.*[a-z])(?=.*[@#$&])/, {
-    message: 'Password must contain at least one lowercase letter and one special character (@#$&)',
-  })
   password: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -75,6 +74,10 @@ export class AdminEntity {
   @Column({ type: 'boolean', default: false })
   @IsOptional()
   isVerified: boolean;
+
+  @ManyToOne(() => SuperAdminEntity, (superAdmin) => superAdmin.admins, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'superAdminId' })
+  superAdmin?: SuperAdminEntity | null;
 
   @CreateDateColumn()
   createdAt: Date;
