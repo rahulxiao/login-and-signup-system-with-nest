@@ -7,7 +7,7 @@ export const mailerConfig = {
     secure: false,
     auth: {
       user: 'rahulxiaozion@gmail.com', 
-      pass: 'password', 
+      pass: '', 
     },
   },
   defaults: {

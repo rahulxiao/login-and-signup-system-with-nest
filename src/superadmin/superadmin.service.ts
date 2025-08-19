@@ -56,7 +56,7 @@ export class SuperAdminService {
 
 	async removeAdmin(superAdminId: number, adminId: number) {
 		const admin = await this.adminRepository.findOne({ where: { id: adminId }, relations: ['superAdmin'] });
-		if (!admin || !admin.superAdmin || admin.superAdmin.id !== superAdminId) {
+		if (admin?.superAdmin?.id !== superAdminId) {
 			throw new NotFoundException('Relation not found');
 		}
 		admin.superAdmin = null;
