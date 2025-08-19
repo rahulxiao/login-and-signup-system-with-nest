@@ -1,435 +1,252 @@
-# 🚀 User Management System API
+# 🚀 Login & Signup System API (NestJS + TypeORM + Mailer)
 
-A robust and scalable user management system built with **NestJS**, **TypeORM**, and **PostgreSQL**. This system provides comprehensive user authentication, management, and CRUD operations with proper validation and error handling.
+A robust user/admin management API built with **NestJS 11**, **TypeORM**, **PostgreSQL**, and **Nest Mailer** (Handlebars templates). Includes JWT-based authentication, admin CRUD utilities, and email workflows.
 
 ## ✨ Features
 
-- 🔐 **User Authentication**: Login and signup with email/username
-- 👥 **User Management**: Create, read, update, and delete users
-- 🔒 **Data Validation**: Comprehensive input validation using class-validator
-- 🗄️ **Database Integration**: PostgreSQL with TypeORM for data persistence
-- 📝 **API Documentation**: Complete Postman collection for testing
-- 🛡️ **Error Handling**: Robust error handling and response formatting
-- 🚀 **RESTful API**: Clean and intuitive REST endpoints
+- 🔐 **Auth**: Login and signup with JWT issuance
+- 👤 **Admin Management**: Create, read, update, delete, and query admins
+- 📨 **Emailing**: Test, welcome, and verification emails via SMTP
+- ✅ **Validation**: Strong DTO validation using `class-validator`
+- 🗄️ **Database**: PostgreSQL with TypeORM (`autoLoadEntities`, `synchronize` enabled)
+- 🛡️ **Global Pipes**: Whitelisting, non-whitelisted protection, and transformation
 
 ## 🛠️ Tech Stack
 
-- **Backend Framework**: NestJS
-- **Database ORM**: TypeORM
-- **Database**: PostgreSQL
-- **Validation**: class-validator
+- **Framework**: NestJS 11
+- **ORM**: TypeORM 0.3
+- **DB**: PostgreSQL
+- **Auth**: `@nestjs/jwt`
+- **Mailer**: `@nestjs-modules/mailer` + Handlebars
+- **Validation**: `class-validator`, `class-transformer`
 - **Language**: TypeScript
-- **Package Manager**: npm
 
 ## 📋 Prerequisites
 
-Before running this application, make sure you have:
+- Node.js 18+
+- npm
+- PostgreSQL 13+
 
-- **Node.js** (v16 or higher)
-- **npm** or **yarn**
-- **PostgreSQL** database server
-- **pgAdmin** (optional, for database management)
+## 🚀 Getting Started
 
-## 🚀 Installation
-
-### 1. Clone the Repository
-```bash
-git clone <your-repository-url>
-cd login-and-signup-syatem
-```
-
-### 2. Install Dependencies
+### 1) Install
 ```bash
 npm install
 ```
 
-### 3. Database Setup
-Create a PostgreSQL database named `login-signup` and update the database configuration in `src/app.module.ts`:
+### 2) Configure
+This project currently uses inline configuration for DB, JWT, and Mailer. You should change these values locally (or migrate them to environment variables with `@nestjs/config`).
 
-```typescript
+- DB: `src/app.module.ts`
+```ts
 TypeOrmModule.forRoot({
   type: 'postgres',
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'your_password',
+  password: '<your-db-password>',
   database: 'login-signup',
-  entities: [UserEntity], // Imported from './user/user.entity'
   autoLoadEntities: true,
   synchronize: true,
-  logging: true,
 })
 ```
 
-### 4. Environment Variables
-Create a `.env` file in the root directory (optional):
+- JWT Secret: `src/auth/constants.ts`
+```ts
+export const jwtConstants = {
+  secret: '<your-jwt-secret>',
+};
+```
 
+- Mailer (SMTP): `src/mailer/mailer.config.ts`
+```ts
+export const mailerConfig = {
+  transport: {
+    host: 'smtp.gmail.com',
+    secure: false,
+    auth: {
+      user: '<your-smtp-user>',
+      pass: '<your-smtp-pass>',
+    },
+  },
+  defaults: { from: '"NestJS Mailer" <noreply@example.com>' },
+  template: { /* Handlebars templates under src/mailer/templates */ },
+};
+```
+See `MAILER_SETUP.md` for details.
+
+You can also create a `.env` for the app port (already supported) and future config:
 ```env
+PORT=3333
+NODE_ENV=development
+# Recommended if you migrate configs:
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=your_password
 DB_DATABASE=login-signup
-PORT=3333
-NODE_ENV=development
+JWT_SECRET=change_me
+MAIL_HOST=smtp.gmail.com
+MAIL_USER=you@example.com
+MAIL_PASS=app_password
+MAIL_FROM="NestJS Mailer" <noreply@example.com>
 ```
 
-## 🏃‍♂️ Running the Application
-
-### Development Mode
+### 3) Run
+- Development
 ```bash
 npm run start:dev
 ```
-
-### Production Build
+- Production
 ```bash
 npm run build
 npm run start:prod
 ```
-
-The application will start on `http://localhost:3333`
+The server listens on `http://localhost:3333` (or `PORT`).
 
 ## 📚 API Endpoints
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/auth/login` | User login with username and password |
-| `POST` | `/auth/signup` | User registration |
+### Auth
+- `POST /auth/login`: Login with username/password → returns `{ access_token }`
+- `POST /auth/signup`: Register a new admin (minimal fields; service fills defaults)
 
-### User Management
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/add/user` | Create a new user with full details |
-| `GET` | `/user/:userId` | Get user information by ID |
-| `DELETE` | `/user/:userId` | Delete user by ID |
-
-### User Updates
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `PUT` | `/update/username` | Update user's username |
-| `PUT` | `/update/password` | Update user's password |
-| `PUT` | `/update/name` | Update user's full name |
-| `PUT` | `/update/mobile` | Update user's mobile number |
-
-## 🔐 JWT Authentication System
-
-### Overview
-The system implements a comprehensive JWT (JSON Web Token) authentication system for secure user access and session management.
-
-### JWT Configuration
-```typescript
-// JWT Module Configuration
-JwtModule.register({
-  global: true,
-  secret: jwtConstants.secret,
-  signOptions: { expiresIn: '1h' },
-})
-```
-
-**Features:**
-- **Global JWT Module**: Available throughout the application
-- **Token Expiration**: 1-hour validity period
-- **Secret Key**: Configurable secret for token signing
-- **Stateless Authentication**: No server-side session storage needed
-
-### Authentication Flow
-
-#### 1. **Login Process** (`POST /auth/login`)
-```typescript
-// Request Body
+Example: `POST /auth/login`
+```json
 {
   "username": "admin_user",
   "password": "SecurePass123"
 }
+```
+Response:
+```json
+{ "access_token": "<jwt>" }
+```
 
-// Response
+### Admin
+Base path: `/admin`
+
+- `POST /admin/create`: Create admin (full profile)
+- `PUT /admin/updateCountry/:id`: Update country
+- `GET /admin/byJoiningDate?date=YYYY-MM-DD`: Filter by joining date
+- `GET /admin/defaultCountry`: Admins with country `Unknown`
+- `GET /admin/all`: List all admins
+- `GET /admin/getAdminInfo`: Legacy list
+- `POST /admin/createAdmin`: Legacy create
+- `DELETE /admin/deleteAdminById/:id`: Delete by id
+- `GET /admin/getAdminById/:id`: Get by id
+- `PUT /admin/updateAdmin/:id`: Update fields
+- `POST /admin/addAdminBody`: Demo add with body fields `name`, `id`
+- `GET /admin/getAdminInfoByNameAndId?name=...&id=...`: Query by name and id
+
+Example: `POST /admin/create`
+```json
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "phone": "+1234567890",
+  "address": "123 Street, City",
+  "username": "jane_smith",
+  "password": "pass@abc",
+  "country": "USA",
+  "dateOfBirth": "1990-01-01",
+  "socialMediaLink": "https://github.com/jane"
 }
 ```
 
-**Process:**
-1. User submits username/password
-2. System validates credentials against database
-3. If valid, generates JWT token with user payload
-4. Returns access token for subsequent requests
+### Mailer
+Base path: `/mailer`
 
-#### 2. **Registration Process** (`POST /auth/signup`)
-```typescript
-// Request Body
-{
-  "username": "new_admin",
-  "email": "admin@example.com",
-  "password": "SecurePass123",
-  "name": "Admin User"
-}
+- `POST /mailer/test`: Send basic test email
+- `POST /mailer/welcome`: Send welcome email `{ email, name }`
+- `POST /mailer/verification`: Send verification email `{ email, name, code }`
+- `POST /mailer/template`: Send email with template `{ email, subject, template, templateData }`
+- `GET /mailer/health`: Health check
 
-// Response
-{
-  "success": true,
-  "message": "Admin created successfully",
-  "data": { ... }
-}
-```
+## 🔐 JWT
+Configured globally in `AuthModule` with 1h expiry. Update `jwtConstants.secret` before production.
 
-**Process:**
-1. User submits registration data
-2. System validates input using DTOs
-3. Creates new admin account in database
-4. Returns success confirmation
+## 🧩 DTOs
 
-### JWT Token Structure
-
-#### **Payload Content**
-```typescript
-{
-  "sub": "user_id",        // Subject (user identifier)
-  "username": "username",  // Username for identification
-  "iat": 1234567890,      // Issued at timestamp
-  "exp": 1234571490       // Expiration timestamp
-}
-```
-
-#### **Token Security Features**
-- **Signed Tokens**: Cryptographically signed with secret key
-- **Expiration**: Automatic token invalidation after 1 hour
-- **Payload Validation**: Ensures token integrity
-- **User Identification**: Unique user ID in token payload
-
-### DTOs (Data Transfer Objects)
-
-#### **LoginDto**
-```typescript
+- `LoginDto`
+```ts
 export class LoginDto {
-  username: string;    // Required username
-  password: string;    // Required password (min 6 chars)
+  username: string;
+  password: string; // min 6 chars
 }
 ```
 
-#### **SignupDto**
-```typescript
+- `SignupDto` (used by `/auth/signup` and auto-augmented in service)
+```ts
 export class SignupDto {
-  username: string;    // Required username
-  email: string;       // Required, email format
-  password: string;    // Required, min 6 chars
-  name: string;        // Required full name
+  username: string;
+  email: string; // valid email
+  password: string; // min 6 chars
+  name: string;
 }
 ```
 
-### Security Features
-
-#### **Input Validation**
-- **Class-validator**: Comprehensive input sanitization
-- **Type Safety**: Strong TypeScript typing
-- **Field Validation**: Required field enforcement
-- **Format Validation**: Email and password format checking
-
-#### **Authentication Security**
-- **Password Verification**: Direct comparison (consider hashing for production)
-- **User Lookup**: Secure username-based authentication
-- **Error Handling**: Generic error messages (security best practice)
-- **Token Generation**: Secure JWT signing process
-
-### Implementation Details
-
-#### **Auth Service Methods**
-```typescript
-export class AuthService {
-  // Authenticate user and return JWT token
-  async signIn(username: string, password: string): Promise<{ access_token: string }>
-  
-  // Register new admin user
-  async signUp(signupDto: SignupDto): Promise<any>
+- `CreateAdminDto` (used by `/admin/create`)
+```ts
+export class CreateAdminDto {
+  name: string;               // letters/spaces only
+  email: string;              // unique
+  phone: string;
+  address: string;
+  username: string;           // letters/numbers/underscores
+  password: string;           // must include lowercase + one of @#$&
+  country?: string;           // defaults to "Unknown"
+  dateOfBirth: string;        // ISO date e.g., 1990-01-01
+  socialMediaLink: string;    // https://github.com|facebook|linkedin|twitter/... 
 }
 ```
-
-#### **Admin Service Integration**
-- **User Lookup**: `findByUsername()` method for authentication
-- **User Creation**: `createAdmin()` method for registration
-- **Data Conversion**: Automatic DTO conversion for compatibility
-- **Error Handling**: Comprehensive error management
-
-### Usage Examples
-
-#### **Protected Route Access**
-```typescript
-// Include JWT token in Authorization header
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-#### **Token Validation**
-```typescript
-// JWT token is automatically validated by NestJS guards
-// Invalid/expired tokens return 401 Unauthorized
-```
-
-### Future Enhancements
-
-#### **Recommended Improvements**
-- **Password Hashing**: Implement bcrypt for password security
-- **Refresh Tokens**: Add refresh token mechanism
-- **Token Blacklisting**: Implement token revocation
-- **Rate Limiting**: Add authentication rate limiting
-- **Audit Logging**: Track authentication attempts
-
-#### **Production Considerations**
-- **Environment Variables**: Move JWT secret to environment
-- **HTTPS Only**: Enforce HTTPS in production
-- **Token Storage**: Secure client-side token storage
-- **Logging**: Comprehensive authentication logging
-
-## 📊 Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  username VARCHAR(30) UNIQUE NOT NULL,
-  email VARCHAR(150) UNIQUE NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  mobile VARCHAR(20),
-  password VARCHAR(100) NOT NULL,
-  role VARCHAR(20) DEFAULT 'user',
-  uniqueId VARCHAR(50) UNIQUE NOT NULL,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-## 🔧 Configuration
-
-### TypeORM Configuration
-The application uses TypeORM with the following configuration:
-- **Database Type**: PostgreSQL
-- **Synchronization**: Enabled (auto-creates tables)
-- **Logging**: Enabled for debugging
-- **Auto-load Entities**: Enabled
-
-### Validation
-All endpoints use class-validator decorators for:
-- Email format validation
-- Password strength requirements
-- String length constraints
-- Required field validation
 
 ## 🧪 Testing
 
-### Postman Collection
-Import the `postman_collection.json` file into Postman for comprehensive API testing.
-
-### Test Data Examples
-
-#### Login Request
-```json
-{
-  "username": "admin_user",
-  "password": "SecurePass123"
-}
-```
-
-#### Create User Request
-```json
-{
-  "username": "jane_smith",
-  "email": "jane.smith@example.com",
-  "password": "SecurePass123",
-  "name": "Jane Smith",
-  "mobile": "+1234567890",
-  "role": "user"
-}
-```
+- Import `postman_collection.json` for Auth/Admin
+- Import `mailer-postman-collection.json` for Mailer
 
 ## 📁 Project Structure
-
 ```
 src/
-├── admin/                   # Admin management module
-│   ├── admin.controller.ts  # Admin API endpoints
-│   ├── admin.service.ts     # Admin business logic
-│   ├── admin.entity.ts      # Admin database entity
-│   └── admin.dto.ts         # Admin data transfer objects
-├── auth/                    # Authentication module
-│   ├── auth.controller.ts   # Auth endpoints (login/signup)
-│   ├── auth.service.ts      # Auth business logic
-│   ├── auth.module.ts       # Auth module configuration
-│   ├── login.dto.ts         # Login validation
-│   ├── signup.dto.ts        # Signup validation
-│   └── constants.ts         # JWT configuration
-├── app.module.ts            # Application module configuration
-└── main.ts                  # Application entry point
+├── admin/
+│   ├── admin.controller.ts
+│   ├── admin.service.ts
+│   ├── admin.entity.ts
+│   └── admin.dto.ts
+├── auth/
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   ├── auth.module.ts
+│   ├── login.dto.ts
+│   ├── signup.dto.ts
+│   └── constants.ts
+├── mailer/
+│   ├── mailer.module.ts
+│   ├── mailer.service.ts
+│   ├── mailer.controller.ts
+│   └── mailer.config.ts
+├── app.module.ts
+└── main.ts
 ```
 
 ## 🔍 Troubleshooting
+- **DB connection failed**: Verify PostgreSQL is running and credentials/database match `app.module.ts`
+- **Port in use**: Change `PORT` or stop the existing process
+- **Emails not sending**: Check SMTP credentials and enable app passwords/less secure app options as required by your provider
 
-### Common Issues
-
-1. **Port Already in Use**
-   ```bash
-   # Kill existing Node.js processes
-   taskkill /F /IM node.exe
-   ```
-
-2. **Database Connection Failed**
-   - Verify PostgreSQL is running
-   - Check database credentials
-   - Ensure database exists
-
-3. **Tables Not Created**
-   - Check TypeORM configuration
-   - Verify `synchronize: true` is set
-   - Make sure entities are properly imported
-
-### Database Connection Issues
-- Verify PostgreSQL service is running
-- Check firewall settings
-- Ensure database user has proper permissions
-
-## 📝 Response Format
-
-All API endpoints return consistent response formats:
-
-### Success Response
-```json
-{
-  "success": true,
-  "message": "Operation successful",
-  "data": { ... }
-}
-```
-
-### Error Response
-```json
-{
-  "success": false,
-  "message": "Error description",
-  "error": "Detailed error message"
-}
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+## 🔒 Security Notes
+- Do not commit real passwords or SMTP credentials
+- Move inline secrets to environment variables for production
+- Hash passwords before saving (consider `bcrypt`); current login compares plaintext
 
 ## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Author
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+MIT (see `LICENSE`)
 
 ## 🙏 Acknowledgments
-
-- NestJS team for the amazing framework
-- TypeORM contributors for the excellent ORM
-- PostgreSQL community for the robust database
+- NestJS team
+- TypeORM contributors
+- PostgreSQL community
+- nest-modules/mailer maintainers
 
 ---
 

@@ -7,11 +7,11 @@ export const mailerConfig = {
     secure: false,
     auth: {
       user: 'rahulxiaozion@gmail.com', 
-      pass: 'pgtt hhqh gdqw qbzm', 
+      pass: 'yourpassword', 
     },
   },
   defaults: {
-    from: '"NestJS Mailer" <noreply@example.com>',
+    from: '"NestJS Mailer" <noreply@xiaozion.com>',
   },
   template: {
     dir: join(process.cwd(), 'src', 'mailer', 'templates'),
